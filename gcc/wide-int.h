@@ -559,7 +559,7 @@ namespace wi
   int parity (const wide_int_ref &);
 
   template <typename T>
-  unsigned HOST_WIDE_INT extract_uhwi (const T &, unsigned int, unsigned int);
+  HOST_WIDE_UINT extract_uhwi (const T &, unsigned int, unsigned int);
 
   template <typename T>
   unsigned int min_precision (const T &, signop);
@@ -648,15 +648,15 @@ public:
   /* Conversions.  */
   HOST_WIDE_INT to_shwi (unsigned int) const;
   HOST_WIDE_INT to_shwi () const;
-  unsigned HOST_WIDE_INT to_uhwi (unsigned int) const;
-  unsigned HOST_WIDE_INT to_uhwi () const;
+  HOST_WIDE_UINT to_uhwi (unsigned int) const;
+  HOST_WIDE_UINT to_uhwi () const;
   HOST_WIDE_INT to_short_addr () const;
 
   /* Public accessors for the interior of a wide int.  */
   HOST_WIDE_INT sign_mask () const;
   HOST_WIDE_INT elt (unsigned int) const;
-  unsigned HOST_WIDE_INT ulow () const;
-  unsigned HOST_WIDE_INT uhigh () const;
+  HOST_WIDE_UINT ulow () const;
+  HOST_WIDE_UINT uhigh () const;
   HOST_WIDE_INT slow () const;
   HOST_WIDE_INT shigh () const;
 
@@ -757,11 +757,11 @@ generic_wide_int <storage>::to_shwi () const
     return to_shwi (this->get_precision ());
 }
 
-/* Return THIS as an unsigned HOST_WIDE_INT, zero-extending from
+/* Return THIS as an HOST_WIDE_UINT, zero-extending from
    PRECISION.  If THIS does not fit in PRECISION, the information
    is lost.  */
 template <typename storage>
-inline unsigned HOST_WIDE_INT
+inline HOST_WIDE_UINT
 generic_wide_int <storage>::to_uhwi (unsigned int precision) const
 {
   if (precision < HOST_BITS_PER_WIDE_INT)
@@ -772,7 +772,7 @@ generic_wide_int <storage>::to_uhwi (unsigned int precision) const
 
 /* Return THIS as an signed HOST_WIDE_INT, in its natural precision.  */
 template <typename storage>
-inline unsigned HOST_WIDE_INT
+inline HOST_WIDE_UINT
 generic_wide_int <storage>::to_uhwi () const
 {
   return to_uhwi (this->get_precision ());
@@ -795,7 +795,7 @@ inline HOST_WIDE_INT
 generic_wide_int <storage>::sign_mask () const
 {
   unsigned int len = this->get_len ();
-  unsigned HOST_WIDE_INT high = this->get_val ()[len - 1];
+  HOST_WIDE_UINT high = this->get_val ()[len - 1];
   if (!is_sign_extended)
     {
       unsigned int precision = this->get_precision ();
@@ -827,7 +827,7 @@ generic_wide_int <storage>::shigh () const
 /* Return the unsigned value of the least-significant
    explicitly-encoded block.  */
 template <typename storage>
-inline unsigned HOST_WIDE_INT
+inline HOST_WIDE_UINT
 generic_wide_int <storage>::ulow () const
 {
   return this->get_val ()[0];
@@ -836,7 +836,7 @@ generic_wide_int <storage>::ulow () const
 /* Return the unsigned value of the most-significant
    explicitly-encoded block.  */
 template <typename storage>
-inline unsigned HOST_WIDE_INT
+inline HOST_WIDE_UINT
 generic_wide_int <storage>::uhigh () const
 {
   return this->get_val ()[this->get_len () - 1];
@@ -1475,7 +1475,7 @@ namespace wi
   };
 
   hwi_with_prec shwi (HOST_WIDE_INT, unsigned int);
-  hwi_with_prec uhwi (unsigned HOST_WIDE_INT, unsigned int);
+  hwi_with_prec uhwi (HOST_WIDE_UINT, unsigned int);
 
   hwi_with_prec minus_one (unsigned int);
   hwi_with_prec zero (unsigned int);
@@ -1498,7 +1498,7 @@ wi::shwi (HOST_WIDE_INT val, unsigned int precision)
 
 /* Return an unsigned integer that has value VAL and precision PRECISION.  */
 inline wi::hwi_with_prec
-wi::uhwi (unsigned HOST_WIDE_INT val, unsigned int precision)
+wi::uhwi (HOST_WIDE_UINT val, unsigned int precision)
 {
   return hwi_with_prec (val, precision, UNSIGNED);
 }
@@ -1671,7 +1671,7 @@ wi::fits_shwi_p (const T &x)
   return xi.len == 1;
 }
 
-/* Return true if X fits in an unsigned HOST_WIDE_INT with no loss of
+/* Return true if X fits in an HOST_WIDE_UINT with no loss of
    precision.  */
 template <typename T>
 inline bool
@@ -1736,7 +1736,7 @@ wi::eq_p (const T1 &x, const T2 &y)
       if (STATIC_CONSTANT_P (yi.val[0] == 0))
 	return xi.val[0] == 0;
       /* Otherwise flush out any excess bits first.  */
-      unsigned HOST_WIDE_INT diff = xi.val[0] ^ yi.val[0];
+      HOST_WIDE_UINT diff = xi.val[0] ^ yi.val[0];
       int excess = HOST_BITS_PER_WIDE_INT - precision;
       if (excess > 0)
 	diff <<= excess;
@@ -1796,16 +1796,16 @@ wi::ltu_p (const T1 &x, const T2 &y)
   WIDE_INT_REF_FOR (T2) yi (y, precision);
   /* Optimize comparisons with constants.  */
   if (STATIC_CONSTANT_P (yi.len == 1 && yi.val[0] >= 0))
-    return xi.len == 1 && xi.to_uhwi () < (unsigned HOST_WIDE_INT) yi.val[0];
+    return xi.len == 1 && xi.to_uhwi () < (HOST_WIDE_UINT) yi.val[0];
   if (STATIC_CONSTANT_P (xi.len == 1 && xi.val[0] >= 0))
-    return yi.len != 1 || yi.to_uhwi () > (unsigned HOST_WIDE_INT) xi.val[0];
+    return yi.len != 1 || yi.to_uhwi () > (HOST_WIDE_UINT) xi.val[0];
   /* Optimize the case of two HWIs.  The HWIs are implicitly sign-extended
      for precisions greater than HOST_BITS_WIDE_INT, but sign-extending both
      values does not change the result.  */
   if (__builtin_expect (xi.len + yi.len == 2, true))
     {
-      unsigned HOST_WIDE_INT xl = xi.to_uhwi ();
-      unsigned HOST_WIDE_INT yl = yi.to_uhwi ();
+      HOST_WIDE_UINT xl = xi.to_uhwi ();
+      HOST_WIDE_UINT yl = yi.to_uhwi ();
       return xl < yl;
     }
   return ltu_p_large (xi.val, xi.len, precision, yi.val, yi.len);
@@ -1956,8 +1956,8 @@ wi::cmpu (const T1 &x, const T2 &y)
       if (xi.len != 1)
 	return 1;
       /* Otherwise compare directly.  */
-      unsigned HOST_WIDE_INT xl = xi.to_uhwi ();
-      unsigned HOST_WIDE_INT yl = yi.val[0];
+      HOST_WIDE_UINT xl = xi.to_uhwi ();
+      HOST_WIDE_UINT yl = yi.val[0];
       return xl < yl ? -1 : xl > yl;
     }
   if (STATIC_CONSTANT_P (xi.len == 1 && xi.val[0] >= 0))
@@ -1966,8 +1966,8 @@ wi::cmpu (const T1 &x, const T2 &y)
       if (yi.len != 1)
 	return -1;
       /* Otherwise compare directly.  */
-      unsigned HOST_WIDE_INT xl = xi.val[0];
-      unsigned HOST_WIDE_INT yl = yi.to_uhwi ();
+      HOST_WIDE_UINT xl = xi.val[0];
+      HOST_WIDE_UINT yl = yi.to_uhwi ();
       return xl < yl ? -1 : xl > yl;
     }
   /* Optimize the case of two HWIs.  The HWIs are implicitly sign-extended
@@ -1975,8 +1975,8 @@ wi::cmpu (const T1 &x, const T2 &y)
      values does not change the result.  */
   if (__builtin_expect (xi.len + yi.len == 2, true))
     {
-      unsigned HOST_WIDE_INT xl = xi.to_uhwi ();
-      unsigned HOST_WIDE_INT yl = yi.to_uhwi ();
+      HOST_WIDE_UINT xl = xi.to_uhwi ();
+      HOST_WIDE_UINT yl = yi.to_uhwi ();
       return xl < yl ? -1 : xl > yl;
     }
   return cmpu_large (xi.val, xi.len, precision, yi.val, yi.len);
@@ -2099,7 +2099,7 @@ wi::set_bit (const T &x, unsigned int bit)
   WIDE_INT_REF_FOR (T) xi (x, precision);
   if (precision <= HOST_BITS_PER_WIDE_INT)
     {
-      val[0] = xi.ulow () | ((unsigned HOST_WIDE_INT) 1 << bit);
+      val[0] = xi.ulow () | ((HOST_WIDE_UINT) 1 << bit);
       result.set_len (1);
     }
   else
@@ -2301,9 +2301,9 @@ wi::add (const T1 &x, const T2 &y)
   else if (STATIC_CONSTANT_P (precision > HOST_BITS_PER_WIDE_INT)
 	   && __builtin_expect (xi.len + yi.len == 2, true))
     {
-      unsigned HOST_WIDE_INT xl = xi.ulow ();
-      unsigned HOST_WIDE_INT yl = yi.ulow ();
-      unsigned HOST_WIDE_INT resultl = xl + yl;
+      HOST_WIDE_UINT xl = xi.ulow ();
+      HOST_WIDE_UINT yl = yi.ulow ();
+      HOST_WIDE_UINT resultl = xl + yl;
       val[0] = resultl;
       val[1] = (HOST_WIDE_INT) resultl < 0 ? 0 : -1;
       result.set_len (1 + (((resultl ^ xl) & (resultl ^ yl))
@@ -2328,9 +2328,9 @@ wi::add (const T1 &x, const T2 &y, signop sgn, bool *overflow)
   WIDE_INT_REF_FOR (T2) yi (y, precision);
   if (precision <= HOST_BITS_PER_WIDE_INT)
     {
-      unsigned HOST_WIDE_INT xl = xi.ulow ();
-      unsigned HOST_WIDE_INT yl = yi.ulow ();
-      unsigned HOST_WIDE_INT resultl = xl + yl;
+      HOST_WIDE_UINT xl = xi.ulow ();
+      HOST_WIDE_UINT yl = yi.ulow ();
+      HOST_WIDE_UINT resultl = xl + yl;
       if (sgn == SIGNED)
 	*overflow = (((resultl ^ xl) & (resultl ^ yl))
 		     >> (precision - 1)) & 1;
@@ -2374,9 +2374,9 @@ wi::sub (const T1 &x, const T2 &y)
   else if (STATIC_CONSTANT_P (precision > HOST_BITS_PER_WIDE_INT)
 	   && __builtin_expect (xi.len + yi.len == 2, true))
     {
-      unsigned HOST_WIDE_INT xl = xi.ulow ();
-      unsigned HOST_WIDE_INT yl = yi.ulow ();
-      unsigned HOST_WIDE_INT resultl = xl - yl;
+      HOST_WIDE_UINT xl = xi.ulow ();
+      HOST_WIDE_UINT yl = yi.ulow ();
+      HOST_WIDE_UINT resultl = xl - yl;
       val[0] = resultl;
       val[1] = (HOST_WIDE_INT) resultl < 0 ? 0 : -1;
       result.set_len (1 + (((resultl ^ xl) & (xl ^ yl))
@@ -2401,9 +2401,9 @@ wi::sub (const T1 &x, const T2 &y, signop sgn, bool *overflow)
   WIDE_INT_REF_FOR (T2) yi (y, precision);
   if (precision <= HOST_BITS_PER_WIDE_INT)
     {
-      unsigned HOST_WIDE_INT xl = xi.ulow ();
-      unsigned HOST_WIDE_INT yl = yi.ulow ();
-      unsigned HOST_WIDE_INT resultl = xl - yl;
+      HOST_WIDE_UINT xl = xi.ulow ();
+      HOST_WIDE_UINT yl = yi.ulow ();
+      HOST_WIDE_UINT resultl = xl - yl;
       if (sgn == SIGNED)
 	*overflow = (((xl ^ yl) & (resultl ^ xl)) >> (precision - 1)) & 1;
       else
@@ -2859,7 +2859,7 @@ wi::lshift (const T1 &x, const T2 &y)
       if (STATIC_CONSTANT_P (xi.precision > HOST_BITS_PER_WIDE_INT)
 	  ? (STATIC_CONSTANT_P (shift < HOST_BITS_PER_WIDE_INT - 1)
 	     && xi.len == 1
-	     && xi.val[0] <= (HOST_WIDE_INT) ((unsigned HOST_WIDE_INT)
+	     && xi.val[0] <= (HOST_WIDE_INT) ((HOST_WIDE_UINT)
 					      HOST_WIDE_INT_MAX >> shift))
 	  : precision <= HOST_BITS_PER_WIDE_INT)
 	{
@@ -3005,7 +3005,7 @@ wi::parity (const wide_int_ref &x)
 
 /* Extract WIDTH bits from X, starting at BITPOS.  */
 template <typename T>
-inline unsigned HOST_WIDE_INT
+inline HOST_WIDE_UINT
 wi::extract_uhwi (const T &x, unsigned int bitpos, unsigned int width)
 {
   unsigned precision = get_precision (x);
@@ -3020,11 +3020,11 @@ wi::extract_uhwi (const T &x, unsigned int bitpos, unsigned int width)
 
   unsigned int start = bitpos / HOST_BITS_PER_WIDE_INT;
   unsigned int shift = bitpos % HOST_BITS_PER_WIDE_INT;
-  unsigned HOST_WIDE_INT res = xi.elt (start);
+  HOST_WIDE_UINT res = xi.elt (start);
   res >>= shift;
   if (shift + width > HOST_BITS_PER_WIDE_INT)
     {
-      unsigned HOST_WIDE_INT upper = xi.elt (start + 1);
+      HOST_WIDE_UINT upper = xi.elt (start + 1);
       res |= upper << (-shift % HOST_BITS_PER_WIDE_INT);
     }
   return zext_hwi (res, width);

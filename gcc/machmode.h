@@ -179,7 +179,7 @@ extern const unsigned char mode_class[NUM_MACHINE_MODES];
 
 /* Get the size in bytes and bits of an object of mode MODE.  */
 
-extern CONST_MODE_SIZE unsigned char mode_size[NUM_MACHINE_MODES];
+extern MODE_SIZE_T mode_size[NUM_MACHINE_MODES];
 #if GCC_VERSION >= 4001
 #define GET_MODE_SIZE(MODE) \
   ((unsigned short) (__builtin_constant_p (MODE) \
@@ -195,17 +195,17 @@ extern const unsigned short mode_precision[NUM_MACHINE_MODES];
 #define GET_MODE_PRECISION(MODE)  mode_precision[MODE]
 
 /* Get the number of integral bits of an object of mode MODE.  */
-extern CONST_MODE_IBIT unsigned char mode_ibit[NUM_MACHINE_MODES];
+extern MODE_IBIT_T mode_ibit[NUM_MACHINE_MODES];
 #define GET_MODE_IBIT(MODE) mode_ibit[MODE]
 
 /* Get the number of fractional bits of an object of mode MODE.  */
-extern CONST_MODE_FBIT unsigned char mode_fbit[NUM_MACHINE_MODES];
+extern MODE_FBIT_T mode_fbit[NUM_MACHINE_MODES];
 #define GET_MODE_FBIT(MODE) mode_fbit[MODE]
 
 /* Get a bitmask containing 1 for all bits in a word
    that fit within mode MODE.  */
 
-extern const unsigned HOST_WIDE_INT mode_mask_array[NUM_MACHINE_MODES];
+extern const HOST_WIDE_UINT mode_mask_array[NUM_MACHINE_MODES];
 
 #define GET_MODE_MASK(MODE) mode_mask_array[MODE]
 
@@ -307,14 +307,14 @@ private:
 /* Find the best mode to use to access a bit field.  */
 
 extern machine_mode get_best_mode (int, int,
-					unsigned HOST_WIDE_INT,
-					unsigned HOST_WIDE_INT,
+					HOST_WIDE_UINT,
+					HOST_WIDE_UINT,
 					unsigned int,
 					machine_mode, bool);
 
 /* Determine alignment, 1<=result<=BIGGEST_ALIGNMENT.  */
 
-extern CONST_MODE_BASE_ALIGN unsigned char mode_base_align[NUM_MACHINE_MODES];
+extern MODE_BASE_ALIGN_T  mode_base_align[NUM_MACHINE_MODES];
 
 extern unsigned get_mode_alignment (machine_mode);
 

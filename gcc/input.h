@@ -29,7 +29,7 @@ extern GTY(()) struct line_maps *line_table;
 #define UNKNOWN_LOCATION ((source_location) 0)
 
 /* The location for declarations in "<built-in>" */
-#define BUILTINS_LOCATION ((source_location) 1)
+//#define BUILTINS_LOCATION ((source_location) 1)
 
 /* line-map.c reserves RESERVED_LOCATION_COUNT to the user.  Ensure
    both UNKNOWN_LOCATION and BUILTINS_LOCATION fit into that.  */

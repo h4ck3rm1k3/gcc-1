@@ -22,7 +22,7 @@
 #define GCC_STATISTICS
 
 #if ! defined GATHER_STATISTICS
-#error GATHER_STATISTICS must be defined
+//#error GATHER_STATISTICS must be defined
 #endif
 
 #define GCC_MEM_STAT_ARGUMENTS const char * ARG_UNUSED (_loc_name), int ARG_UNUSED (_loc_line), const char * ARG_UNUSED (_loc_function)

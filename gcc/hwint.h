@@ -58,7 +58,7 @@ extern char sizeof_long_long_must_be_8[sizeof (long long) == 8 ? 1 : -1];
 #   define HOST_WIDE_INT long long
 #   define HOST_WIDE_INT_C(X) X ## LL
 # else
-   #error "Unable to find a suitable type for HOST_WIDE_INT"
+//#error "Unable to find a suitable type for HOST_WIDE_INT"
 # endif
 #endif
 
@@ -154,7 +154,7 @@ extern int ceil_log2			(unsigned HOST_WIDE_INT);
 
 /* For convenience, define 0 -> word_size.  */
 static inline int
-clz_hwi (unsigned HOST_WIDE_INT x)
+clz_hwi (HOST_WIDE_UINT x)
 {
   if (x == 0)
     return HOST_BITS_PER_WIDE_INT;
@@ -168,7 +168,7 @@ clz_hwi (unsigned HOST_WIDE_INT x)
 }
 
 static inline int
-ctz_hwi (unsigned HOST_WIDE_INT x)
+ctz_hwi (HOST_WIDE_UINT x)
 {
   if (x == 0)
     return HOST_BITS_PER_WIDE_INT;
@@ -182,7 +182,7 @@ ctz_hwi (unsigned HOST_WIDE_INT x)
 }
 
 static inline int
-ffs_hwi (unsigned HOST_WIDE_INT x)
+ffs_hwi (HOST_WIDE_UINT x)
 {
 # if HOST_BITS_PER_WIDE_INT == HOST_BITS_PER_LONG
   return __builtin_ffsl (x);
@@ -194,7 +194,7 @@ ffs_hwi (unsigned HOST_WIDE_INT x)
 }
 
 static inline int
-popcount_hwi (unsigned HOST_WIDE_INT x)
+popcount_hwi (HOST_WIDE_UINT x)
 {
 # if HOST_BITS_PER_WIDE_INT == HOST_BITS_PER_LONG
   return __builtin_popcountl (x);
@@ -206,19 +206,19 @@ popcount_hwi (unsigned HOST_WIDE_INT x)
 }
 
 static inline int
-floor_log2 (unsigned HOST_WIDE_INT x)
+floor_log2 (HOST_WIDE_UINT x)
 {
   return HOST_BITS_PER_WIDE_INT - 1 - clz_hwi (x);
 }
 
 static inline int
-ceil_log2 (unsigned HOST_WIDE_INT x)
+ceil_log2 (HOST_WIDE_UINT x)
 {
   return floor_log2 (x - 1) + 1;
 }
 
 static inline int
-exact_log2 (unsigned HOST_WIDE_INT x)
+exact_log2 (HOST_WIDE_UINT x)
 {
   return x == (x & -x) && x ? ctz_hwi (x) : -1;
 }
@@ -226,11 +226,11 @@ exact_log2 (unsigned HOST_WIDE_INT x)
 #endif /* GCC_VERSION >= 3004 */
 
 #define HOST_WIDE_INT_MIN (HOST_WIDE_INT) \
-  ((unsigned HOST_WIDE_INT) 1 << (HOST_BITS_PER_WIDE_INT - 1))
+  ((HOST_WIDE_UINT) 1 << (HOST_BITS_PER_WIDE_INT - 1))
 #define HOST_WIDE_INT_MAX (~(HOST_WIDE_INT_MIN))
 
 extern HOST_WIDE_INT abs_hwi (HOST_WIDE_INT);
-extern unsigned HOST_WIDE_INT absu_hwi (HOST_WIDE_INT);
+extern HOST_WIDE_UINT absu_hwi (HOST_WIDE_INT);
 extern HOST_WIDE_INT gcd (HOST_WIDE_INT, HOST_WIDE_INT);
 extern HOST_WIDE_INT pos_mul_hwi (HOST_WIDE_INT, HOST_WIDE_INT);
 extern HOST_WIDE_INT mul_hwi (HOST_WIDE_INT, HOST_WIDE_INT);
@@ -252,15 +252,15 @@ sext_hwi (HOST_WIDE_INT src, unsigned int prec)
 }
 
 /* Zero extend SRC starting from PREC.  */
-static inline unsigned HOST_WIDE_INT
-zext_hwi (unsigned HOST_WIDE_INT src, unsigned int prec)
+static inline HOST_WIDE_UINT
+zext_hwi (HOST_WIDE_UINT src, unsigned int prec)
 {
   if (prec == HOST_BITS_PER_WIDE_INT)
     return src;
   else
     {
       gcc_checking_assert (prec < HOST_BITS_PER_WIDE_INT);
-      return src & (((unsigned HOST_WIDE_INT) 1 << prec) - 1);
+      return src & (((HOST_WIDE_UINT) 1 << prec) - 1);
     }
 }
 

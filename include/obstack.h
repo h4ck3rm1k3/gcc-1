@@ -150,7 +150,7 @@ extern "C" {
 # ifdef memcpy
 #  define _obstack_memcpy(To, From, N) memcpy ((To), (char *)(From), (N))
 # else
-#  define _obstack_memcpy(To, From, N) bcopy ((char *)(From), (To), (N))
+  //#  define _obstack_memcpy(To, From, N) bcopy ((char *)(From), (To), (N))
 # endif
 #endif
 
