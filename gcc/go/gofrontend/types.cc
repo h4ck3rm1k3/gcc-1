@@ -2458,6 +2458,19 @@ Type::mangled_name(Gogo* gogo) const
   return ret;
 }
 
+std::string
+Type::name(Gogo* gogo) const
+{
+  std::string ret;
+
+  // The do_mangled_name virtual function should set RET to the
+  // mangled name.  For a composite type it should append a code for
+  // the composition and then call do_name on the components.
+  this->do_name(gogo, &ret);
+
+  return ret;
+}
+
 // Return whether the backend size of the type is known.
 
 bool
@@ -2636,6 +2649,10 @@ class Error_type : public Type
   void
   do_mangled_name(Gogo*, std::string* ret) const
   { ret->push_back('E'); }
+
+  void
+  do_name(Gogo*, std::string* ret) const
+  { ret->append("Error: "); }
 };
 
 Type*
@@ -2678,6 +2695,10 @@ class Void_type : public Type
   void
   do_mangled_name(Gogo*, std::string* ret) const
   { ret->push_back('v'); }
+
+  void
+  do_name(Gogo*, std::string* ret) const
+  { ret->append("void "); }
 };
 
 Type*
@@ -2719,6 +2740,10 @@ class Boolean_type : public Type
   void
   do_mangled_name(Gogo*, std::string* ret) const
   { ret->push_back('b'); }
+
+  void
+  do_name(Gogo*, std::string* ret) const
+  { ret->append("bool "); }
 };
 
 // Make the type descriptor.
@@ -2905,6 +2930,18 @@ Integer_type::do_mangled_name(Gogo*, std::string* ret) const
   ret->append(buf);
 }
 
+void
+Integer_type::do_name(Gogo*, std::string* ret) const
+{
+  char buf[100];
+  snprintf(buf, sizeof buf, "%sint%de %s",
+	   this->is_unsigned_ ? "u" : "",
+	   this->bits_,
+	   this->is_abstract_ ? "(abstract)" : ""
+	   );
+  ret->append(buf);
+}
+
 // Make an integer type.
 
 Named_type*
@@ -3039,6 +3076,17 @@ Float_type::do_mangled_name(Gogo*, std::string* ret) const
   ret->append(buf);
 }
 
+void
+Float_type::do_name(Gogo*, std::string* ret) const
+{
+  char buf[100];
+  snprintf(buf, sizeof buf, "float%de %s",
+	   this->bits_,
+	   this->is_abstract_ ? "(abstract)" : ""
+	   );
+  ret->append(buf);
+}
+
 // Make a floating point type.
 
 Named_type*
@@ -3166,6 +3214,17 @@ Complex_type::do_mangled_name(Gogo*, std::string* ret) const
   ret->append(buf);
 }
 
+void
+Complex_type::do_name(Gogo*, std::string* ret) const
+{
+  char buf[100];
+  snprintf(buf, sizeof buf, "c%de %s",
+	   this->bits_,
+	   this->is_abstract_ ? "(abstract)" : ""
+	   );
+  ret->append(buf);
+}
+
 // Make a complex type.
 
 Named_type*
@@ -3273,6 +3332,12 @@ String_type::do_mangled_name(Gogo*, std::string* ret) const
   ret->push_back('z');
 }
 
+void
+String_type::do_name(Gogo*, std::string* ret) const
+{
+  ret->append("string ");
+}
+
 // Make a string type.
 
 Type*
@@ -3342,6 +3407,11 @@ class Sink_type : public Type
   void
   do_mangled_name(Gogo*, std::string*) const
   { go_unreachable(); }
+
+  void
+  do_name(Gogo*, std::string* ret) const
+  { ret->push_back('_'); }
+
 };
 
 // Make the sink type.
@@ -3977,6 +4047,45 @@ Function_type::do_mangled_name(Gogo* gogo, std::string* ret) const
   ret->push_back('e');
 }
 
+void
+Function_type::do_name(Gogo* gogo, std::string* ret) const
+{
+  ret->append("func ");
+
+  if (this->receiver_ != NULL)
+    {
+      ret->push_back('(');
+      this->append_name(this->receiver_->type(), gogo, ret);
+      ret->push_back(')');
+    }
+
+  const Typed_identifier_list* params = this->parameters();
+  if (params != NULL)
+    {
+      ret->push_back('(');
+      for (Typed_identifier_list::const_iterator p = params->begin();
+	   p != params->end();
+	   ++p)
+	this->append_name(p->type(), gogo, ret);
+      if (this->is_varargs_)
+	ret->append("...interface{} /*var args*/");
+      ret->push_back(')');
+    }
+
+  const Typed_identifier_list* results = this->results();
+  if (results != NULL)
+    {
+      ret->push_back('(');
+      for (Typed_identifier_list::const_iterator p = results->begin();
+	   p != results->end();
+	   ++p)
+	this->append_mangled_name(p->type(), gogo, ret);
+      ret->push_back(')');
+    }
+
+  //  ret->push_back('{}');
+}
+
 // Export a function type.
 
 void
@@ -4366,6 +4475,13 @@ Pointer_type::do_mangled_name(Gogo* gogo, std::string* ret) const
   this->append_mangled_name(this->to_type_, gogo, ret);
 }
 
+void
+Pointer_type::do_name(Gogo* gogo, std::string* ret) const
+{
+  ret->push_back('*');
+  this->append_name(this->to_type_, gogo, ret);
+}
+
 // Export.
 
 void
@@ -4443,6 +4559,10 @@ class Nil_type : public Type
   void
   do_mangled_name(Gogo*, std::string* ret) const
   { ret->push_back('n'); }
+
+  void
+  do_name(Gogo*, std::string* ret) const
+  { ret->append("nil "); }
 };
 
 // Make the nil type.
@@ -4504,6 +4624,21 @@ class Call_multiple_result_type : public Type
   void
   do_mangled_name(Gogo*, std::string*) const
   { go_assert(saw_errors()); }
+
+    void
+  do_name(Gogo* gogo, std::string* ret) const
+  {
+    const Expression_list* results = call_->args();
+    if (results != NULL)
+      {
+	ret->push_back('(');
+	for (Expression_list::const_iterator p = results->begin();
+	     p != results->end();
+	     ++p)
+	  this->append_name((*p)->type(), gogo, ret);
+	ret->push_back(')');
+      }
+  }
 
  private:
   // The expression being called.
@@ -5556,6 +5691,59 @@ Struct_type::do_mangled_name(Gogo* gogo, std::string* ret) const
   ret->push_back('e');
 }
 
+void
+Struct_type::do_name(Gogo* gogo, std::string* ret) const
+{
+  ret->append("type ");
+
+  const Named_type* n=this->named_type();
+  if (n != NULL)
+    { ret->append(n->name()); }
+
+  ret->append("Struct {");
+    
+  const Struct_field_list* fields = this->fields_;
+  if (fields != NULL)
+    {
+      for (Struct_field_list::const_iterator p = fields->begin();
+	   p != fields->end();
+	   ++p)
+	{
+	  if (p->is_anonymous())
+	    ret->append("/*Anon*/");
+	  else
+	    {
+	      std::string n = Gogo::unpack_hidden_name(p->field_name());
+	      ret->append(n);
+	    }
+	  this->append_name(p->type(), gogo, ret);
+	  if (p->has_tag())
+	    {
+	      const std::string& tag(p->tag());
+	      std::string out;
+	      for (std::string::const_iterator p = tag.begin();
+		   p != tag.end();
+		   ++p)
+		{
+		  if (ISALNUM(*p) || *p == '_')
+		    out.push_back(*p);
+		  else
+		    {
+		      char buf[20];
+		      snprintf(buf, sizeof buf, ".%x.",
+			       static_cast<unsigned int>(*p));
+		      out.append(buf);
+		    }
+		}
+	      ret->append("Tag");
+	      ret->append(out);
+	    }
+	}
+    }
+
+  ret->push_back('}');
+}
+
 // If the offset of field INDEX in the backend implementation can be
 // determined, set *POFFSET to the offset in bytes and return true.
 // Otherwise, return false.
@@ -6522,6 +6710,37 @@ Array_type::do_mangled_name(Gogo* gogo, std::string* ret) const
   ret->push_back('e');
 }
 
+void
+Array_type::do_name(Gogo* gogo, std::string* ret) const
+{
+
+  if (this->length_ != NULL)
+    {
+      Numeric_constant nc;
+      unsigned long val;
+      if (!this->length_->numeric_constant_value(&nc)
+	  || nc.to_unsigned_long(&val) != Numeric_constant::NC_UL_VALID)
+	{
+	  if (!this->issued_length_error_)
+	    {
+	      error_at(this->length_->location(), "invalid array length");
+	      this->issued_length_error_ = true;
+	    }
+	}
+      else
+	{
+	  char buf[50];
+	  snprintf(buf, sizeof buf, "[%lu]", val);
+	  ret->append(buf);
+	}
+    }
+
+  
+  this->append_name(this->element_type_, gogo, ret);
+  
+
+}
+
 // Make an array type.
 
 Array_type*
@@ -6833,6 +7052,15 @@ Map_type::do_mangled_name(Gogo* gogo, std::string* ret) const
   this->append_mangled_name(this->val_type_, gogo, ret);
 }
 
+void
+Map_type::do_name(Gogo* gogo, std::string* ret) const
+{
+  ret->append("map[");
+  this->append_name(this->key_type_, gogo, ret);
+  ret->append("]");
+  this->append_name(this->val_type_, gogo, ret);
+}
+
 // Export a map type.
 
 void
@@ -7026,6 +7254,18 @@ Channel_type::do_mangled_name(Gogo* gogo, std::string* ret) const
   if (this->may_receive_)
     ret->push_back('r');
   ret->push_back('e');
+}
+
+void
+Channel_type::do_name(Gogo* gogo, std::string* ret) const
+{
+  ret->append("chan ");
+  this->append_name(this->element_type_, gogo, ret);
+  if (this->may_send_)
+    ret->append("->");
+  if (this->may_receive_)
+    ret->append("<-");
+
 }
 
 // Export.
@@ -7959,6 +8199,44 @@ Interface_type::do_mangled_name(Gogo* gogo, std::string* ret) const
     }
 
   ret->push_back('e');
+}
+
+void
+Interface_type::do_name(Gogo* gogo, std::string* ret) const
+{
+  go_assert(this->methods_are_finalized_);
+
+  ret->append("interface {");
+
+  const Typed_identifier_list* methods = this->all_methods_;
+  if (methods != NULL && !this->seen_)
+    {
+      this->seen_ = true;
+      for (Typed_identifier_list::const_iterator p = methods->begin();
+	   p != methods->end();
+	   ++p)
+	{
+	  if (!p->name().empty())
+	    {
+	      std::string n;
+	      if (!Gogo::is_hidden_name(p->name()))
+		n = p->name();
+	      else
+		{
+		  n = ".";
+		  std::string pkgpath = Gogo::hidden_name_pkgpath(p->name());
+		  n.append(Gogo::pkgpath_for_symbol(pkgpath));
+		  n.append(1, '.');
+		  n.append(Gogo::unpack_hidden_name(p->name()));
+		}
+	      ret->append(n);
+	    }
+	  this->append_name(p->type(), gogo, ret);
+	}
+      this->seen_ = false;
+    }
+
+  ret->push_back('}');
 }
 
 // Export.
@@ -9203,6 +9481,49 @@ Named_type::do_mangled_name(Gogo* gogo, std::string* ret) const
   ret->append(name);
 }
 
+void
+Named_type::do_name(Gogo* gogo, std::string* ret) const
+{
+  if (this->is_alias())
+    {
+      this->append_name(this->type_, gogo, ret);
+      return;
+    }
+  Named_object* no = this->named_object_;
+  std::string name;
+  if (this->is_builtin())
+    go_assert(this->in_function_ == NULL);
+  else
+    {
+      const std::string& pkgpath(no->package() == NULL
+				 ? gogo->pkgpath_symbol()
+				 : no->package()->pkgpath_symbol());
+      name = pkgpath;
+
+      if (this->in_function_ != NULL)
+	{
+	  const Typed_identifier* rcvr =
+	    this->in_function_->func_value()->type()->receiver();
+	  if (rcvr != NULL)
+	    {
+	      Named_type* rcvr_type = rcvr->type()->deref()->named_type();
+	      name.append(Gogo::unpack_hidden_name(rcvr_type->name()));
+
+	    }
+	  name.append(Gogo::unpack_hidden_name(this->in_function_->name()));
+	  name.append(1, '$');
+	  if (this->in_function_index_ > 0)
+	    {
+	      char buf[30];
+	      snprintf(buf, sizeof buf, "in_function_index %u", this->in_function_index_);
+	      name.append(buf);
+	    }
+	}
+    }
+  name.append(Gogo::unpack_hidden_name(no->name()));
+  ret->append(name);
+}
+
 // Export the type.  This is called to export a global type.
 
 void
@@ -10410,6 +10731,26 @@ Forward_declaration_type::do_mangled_name(Gogo* gogo, std::string* ret) const
       snprintf(buf, sizeof buf, "N%u_",
 	       static_cast<unsigned int>(name.length()));
       ret->append(buf);
+      ret->append(name);
+    }
+}
+
+void
+Forward_declaration_type::do_name(Gogo* gogo, std::string* ret) const
+{
+  if (this->is_defined())
+    this->append_name(this->real_type(), gogo, ret);
+  else
+    {
+      const Named_object* no = this->named_object();
+      std::string name;
+      if (no->package() == NULL)
+	name = gogo->pkgpath_symbol();
+      else
+	name = no->package()->pkgpath_symbol();
+      name += '.';
+      name += Gogo::unpack_hidden_name(no->name());
+
       ret->append(name);
     }
 }

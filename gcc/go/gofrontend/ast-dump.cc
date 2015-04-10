@@ -189,10 +189,8 @@ Ast_dump_context::dump_type(const Type* t)
   if (t == NULL)
     this->ostream() << "(nil type)";
   else
-    // FIXME: write a type pretty printer instead of
-    // using mangled names.
     if (this->gogo_ != NULL)
-      this->ostream() << "(" << t->mangled_name(this->gogo_) <<  ")";
+      this->ostream() << "(" << t->name(this->gogo_) <<  ")";
 }
 
 // Dump a textual representation of a block to the
