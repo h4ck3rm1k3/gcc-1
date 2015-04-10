@@ -3027,11 +3027,18 @@ Check_types_traverse::variable(Named_object* named_object)
 	  && !Type::are_assignable(var->type(), init->type(), &reason))
 	{
 	  if (reason.empty())
-	    error_at(var->location(), "incompatible type in initialization");
+	    error_at(var->location(), "incompatible type in initialization var type (%s) init type(%s)",
+		     var->type()->mangled_name(this->gogo_).c_str(),
+		     init->type()->mangled_name(this->gogo_).c_str()
+		     );
+	  
 	  else
 	    error_at(var->location(),
-		     "incompatible type in initialization (%s)",
-		     reason.c_str());
+		     "incompatible type in initialization (%s) var type (%s) init type(%s)",
+		     reason.c_str(),
+		     var->type()->mangled_name(this->gogo_).c_str(),
+		     init->type()->mangled_name(this->gogo_).c_str()
+		     );
 	  var->clear_init();
 	}
       else if (!var->is_used()
