@@ -938,6 +938,11 @@ class Type
   std::string
   mangled_name(Gogo*) const;
 
+  // Return a name for the type.  This is a name which can be
+  // used by the user for printing out and writing new code.
+  std::string
+  name(Gogo*) const;
+
   // If the size of the type can be determined, set *PSIZE to the size
   // in bytes and return true.  Otherwise, return false.  This queries
   // the backend.
@@ -1022,6 +1027,9 @@ class Type
   do_mangled_name(Gogo*, std::string*) const = 0;
 
   virtual void
+  do_name(Gogo*, std::string*) const =0;
+  
+  virtual void
   do_export(Export*) const;
 
   // Return whether a method expects a pointer as the receiver.
@@ -1095,6 +1103,10 @@ class Type
   void
   append_mangled_name(const Type* type, Gogo* gogo, std::string* ret) const
   { type->do_mangled_name(gogo, ret); }
+
+  void
+  append_name(const Type* type, Gogo* gogo, std::string* ret) const
+  { type->do_name(gogo, ret); }
 
   // Incorporate a string into a hash code.
   static unsigned int
@@ -1557,6 +1569,9 @@ protected:
   void
   do_mangled_name(Gogo*, std::string*) const;
 
+  void
+  do_name(Gogo*, std::string*) const;
+
  private:
   Integer_type(bool is_abstract, bool is_unsigned, int bits,
 	       int runtime_type_kind)
@@ -1638,6 +1653,9 @@ class Float_type : public Type
   void
   do_mangled_name(Gogo*, std::string*) const;
 
+  void
+  do_name(Gogo*, std::string*) const;
+
  private:
   Float_type(bool is_abstract, int bits, int runtime_type_kind)
     : Type(TYPE_FLOAT),
@@ -1711,6 +1729,9 @@ class Complex_type : public Type
   void
   do_mangled_name(Gogo*, std::string*) const;
 
+  void
+  do_name(Gogo*, std::string*) const;
+
  private:
   Complex_type(bool is_abstract, int bits, int runtime_type_kind)
     : Type(TYPE_COMPLEX),
@@ -1762,6 +1783,9 @@ class String_type : public Type
 
   void
   do_mangled_name(Gogo*, std::string* ret) const;
+
+  void
+  do_name(Gogo*, std::string* ret) const;
 
  private:
   // The named string type.
@@ -1902,6 +1926,9 @@ class Function_type : public Type
   do_mangled_name(Gogo*, std::string*) const;
 
   void
+  do_name(Gogo*, std::string*) const;
+
+  void
   do_export(Export*) const;
 
  private:
@@ -2019,6 +2046,9 @@ class Pointer_type : public Type
 
   void
   do_mangled_name(Gogo*, std::string*) const;
+
+  void
+  do_name(Gogo*, std::string*) const;
 
   void
   do_export(Export*) const;
@@ -2316,6 +2346,9 @@ class Struct_type : public Type
   do_mangled_name(Gogo*, std::string*) const;
 
   void
+  do_name(Gogo*, std::string*) const;
+  
+  void
   do_export(Export*) const;
 
  private:
@@ -2457,6 +2490,9 @@ class Array_type : public Type
   do_mangled_name(Gogo*, std::string*) const;
 
   void
+  do_name(Gogo*, std::string*) const;
+  
+  void
   do_export(Export*) const;
 
  private:
@@ -2561,6 +2597,9 @@ class Map_type : public Type
   do_mangled_name(Gogo*, std::string*) const;
 
   void
+  do_name(Gogo*, std::string*) const;
+  
+  void
   do_export(Export*) const;
 
  private:
@@ -2649,6 +2688,9 @@ class Channel_type : public Type
   void
   do_mangled_name(Gogo*, std::string*) const;
 
+  void
+  do_name(Gogo*, std::string*) const;
+  
   void
   do_export(Export*) const;
 
@@ -2785,6 +2827,9 @@ class Interface_type : public Type
   void
   do_mangled_name(Gogo*, std::string*) const;
 
+  void
+  do_name(Gogo*, std::string*) const;
+  
   void
   do_export(Export*) const;
 
@@ -3074,6 +3119,9 @@ class Named_type : public Type
 
   void
   do_mangled_name(Gogo*, std::string* ret) const;
+  
+  void
+  do_name(Gogo*, std::string* ret) const;
 
   void
   do_export(Export*) const;
@@ -3224,6 +3272,9 @@ class Forward_declaration_type : public Type
   void
   do_mangled_name(Gogo*, std::string* ret) const;
 
+  void
+  do_name(Gogo*, std::string* ret) const;
+  
   void
   do_export(Export*) const;
 
