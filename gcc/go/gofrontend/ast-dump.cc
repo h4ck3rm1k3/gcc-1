@@ -65,6 +65,12 @@ class Ast_dump_traverse_statements : public Traverse
 
 int Ast_dump_traverse_blocks_and_functions::block(Block * block)
 {
+  if (block == NULL)
+    {
+      this->ast_dump_context_->ostream() << "/* ERROR NULL BLOCK */" << std::endl;
+      return TRAVERSE_SKIP_COMPONENTS;
+    }
+      
   this->ast_dump_context_->print_indent();
   this->ast_dump_context_->ostream() << "{" << std::endl;
   this->ast_dump_context_->indent();
