@@ -2934,10 +2934,10 @@ void
 Integer_type::do_name(Gogo*, std::string* ret) const
 {
   char buf[100];
-  snprintf(buf, sizeof buf, "%sint%de %s",
+  snprintf(buf, sizeof buf, "%sint%de%s ",
 	   this->is_unsigned_ ? "u" : "",
 	   this->bits_,
-	   this->is_abstract_ ? "(abstract)" : ""
+	   this->is_abstract_ ? " (abstract)" : ""
 	   );
   ret->append(buf);
 }
@@ -3080,9 +3080,9 @@ void
 Float_type::do_name(Gogo*, std::string* ret) const
 {
   char buf[100];
-  snprintf(buf, sizeof buf, "float%de %s",
+  snprintf(buf, sizeof buf, "float%de%s ",
 	   this->bits_,
-	   this->is_abstract_ ? "(abstract)" : ""
+	   this->is_abstract_ ? " (abstract)" : ""
 	   );
   ret->append(buf);
 }
@@ -3218,9 +3218,9 @@ void
 Complex_type::do_name(Gogo*, std::string* ret) const
 {
   char buf[100];
-  snprintf(buf, sizeof buf, "c%de %s",
+  snprintf(buf, sizeof buf, "c%de%s",
 	   this->bits_,
-	   this->is_abstract_ ? "(abstract)" : ""
+	   this->is_abstract_ ? " (abstract)" : ""
 	   );
   ret->append(buf);
 }
@@ -4050,6 +4050,8 @@ Function_type::do_mangled_name(Gogo* gogo, std::string* ret) const
 void
 Function_type::do_name(Gogo* gogo, std::string* ret) const
 {
+  ret->append("/*Function_type*/");
+    
   ret->append("func ");
 
   if (this->receiver_ != NULL)
@@ -4478,6 +4480,7 @@ Pointer_type::do_mangled_name(Gogo* gogo, std::string* ret) const
 void
 Pointer_type::do_name(Gogo* gogo, std::string* ret) const
 {
+  ret->append("/*Pointer_type*/");
   ret->push_back('*');
   this->append_name(this->to_type_, gogo, ret);
 }
@@ -5694,6 +5697,7 @@ Struct_type::do_mangled_name(Gogo* gogo, std::string* ret) const
 void
 Struct_type::do_name(Gogo* gogo, std::string* ret) const
 {
+  ret->append("/*Struct_type*/");
   ret->append("type ");
 
   const Named_type* n=this->named_type();
@@ -6714,6 +6718,8 @@ void
 Array_type::do_name(Gogo* gogo, std::string* ret) const
 {
 
+  ret->append("/*Array_type*/");
+    
   if (this->length_ != NULL)
     {
       Numeric_constant nc;
@@ -7055,6 +7061,7 @@ Map_type::do_mangled_name(Gogo* gogo, std::string* ret) const
 void
 Map_type::do_name(Gogo* gogo, std::string* ret) const
 {
+  ret->append("/*Map_type*/");
   ret->append("map[");
   this->append_name(this->key_type_, gogo, ret);
   ret->append("]");
@@ -7259,6 +7266,7 @@ Channel_type::do_mangled_name(Gogo* gogo, std::string* ret) const
 void
 Channel_type::do_name(Gogo* gogo, std::string* ret) const
 {
+  ret->append("/*Channel_type*/");
   ret->append("chan ");
   this->append_name(this->element_type_, gogo, ret);
   if (this->may_send_)
@@ -8204,6 +8212,7 @@ Interface_type::do_mangled_name(Gogo* gogo, std::string* ret) const
 void
 Interface_type::do_name(Gogo* gogo, std::string* ret) const
 {
+  ret->append("/*Interface_type*/");
   go_assert(this->methods_are_finalized_);
 
   ret->append("interface {");
@@ -9484,6 +9493,7 @@ Named_type::do_mangled_name(Gogo* gogo, std::string* ret) const
 void
 Named_type::do_name(Gogo* gogo, std::string* ret) const
 {
+  ret->append("/*Named_type*/");
   if (this->is_alias())
     {
       this->append_name(this->type_, gogo, ret);
@@ -9507,11 +9517,16 @@ Named_type::do_name(Gogo* gogo, std::string* ret) const
 	  if (rcvr != NULL)
 	    {
 	      Named_type* rcvr_type = rcvr->type()->deref()->named_type();
-	      name.append(Gogo::unpack_hidden_name(rcvr_type->name()));
-
+	      //name.append(Gogo::unpack_hidden_name(rcvr_type->name()));
+	      name.append(rcvr_type->name());
+	      name.push_back(' ');
 	    }
-	  name.append(Gogo::unpack_hidden_name(this->in_function_->name()));
-	  name.append(1, '$');
+
+	  name.append(this->in_function_->name());
+	  name.push_back(' ');
+	  //name.append(Gogo::unpack_hidden_name(this->in_function_->name()));
+	  
+	  
 	  if (this->in_function_index_ > 0)
 	    {
 	      char buf[30];
@@ -9520,8 +9535,11 @@ Named_type::do_name(Gogo* gogo, std::string* ret) const
 	    }
 	}
     }
-  name.append(Gogo::unpack_hidden_name(no->name()));
+  name.append(no->name());
+  //name.append(Gogo::unpack_hidden_name(no->name()));
+  ret->push_back(' ');
   ret->append(name);
+  ret->push_back(' ');
 }
 
 // Export the type.  This is called to export a global type.
@@ -10738,6 +10756,7 @@ Forward_declaration_type::do_mangled_name(Gogo* gogo, std::string* ret) const
 void
 Forward_declaration_type::do_name(Gogo* gogo, std::string* ret) const
 {
+  ret->append("/*Forward_declaration_type*/");
   if (this->is_defined())
     this->append_name(this->real_type(), gogo, ret);
   else
