@@ -2196,6 +2196,9 @@ class Named_object
   std::string
   message_name() const;
 
+  std::string
+  simple_name() const;
+
   const Package*
   package() const
   { return this->package_; }
@@ -2500,6 +2503,9 @@ class Label
   const std::string&
   name() const
   { return this->name_; }
+
+  
+  std::string  simple_name();
 
   // Return whether the label has been defined.
   bool

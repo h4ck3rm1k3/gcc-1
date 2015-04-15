@@ -777,7 +777,7 @@ Var_expression::do_get_backend(Translate_context* context)
 void
 Var_expression::do_dump_expression(Ast_dump_context* ast_dump_context) const
 {
-  ast_dump_context->ostream() << this->variable_->name() ;
+  ast_dump_context->ostream() << this->variable_->simple_name() ;
 }
 
 // Make a reference to a variable in an expression.
@@ -1137,7 +1137,7 @@ Func_expression::do_get_backend(Translate_context* context)
 void
 Func_expression::do_dump_expression(Ast_dump_context* ast_dump_context) const
 {
-  ast_dump_context->ostream() << this->function_->name();
+  ast_dump_context->ostream() << this->function_->simple_name();
   if (this->closure_ != NULL)
     {
       ast_dump_context->ostream() << " {closure =  ";
@@ -1251,7 +1251,7 @@ Func_descriptor_expression::do_get_backend(Translate_context* context)
 void
 Func_descriptor_expression::do_dump_expression(Ast_dump_context* context) const
 {
-  context->ostream() << "[descriptor " << this->fn_->name() << "]";
+  context->ostream() << "[descriptor " << this->fn_->simple_name() << "]";
 }
 
 // Make a function descriptor expression.
@@ -1309,7 +1309,7 @@ class Func_code_reference_expression : public Expression
 
   void
   do_dump_expression(Ast_dump_context* context) const
-  { context->ostream() << "[raw " << this->function_->name() << "]" ; }
+  { context->ostream() << "[raw " << this->function_->simple_name() << "]" ; }
 
  private:
   // The function.
@@ -1401,7 +1401,7 @@ Unknown_expression::do_lower(Gogo*, Named_object*, Statement_inserter*, int)
 void
 Unknown_expression::do_dump_expression(Ast_dump_context* ast_dump_context) const
 {
-  ast_dump_context->ostream() << "_Unknown_(" << this->named_object_->name()
+  ast_dump_context->ostream() << "_Unknown_(" << this->named_object_->simple_name()
 			      << ")";
 }
 
@@ -2869,7 +2869,7 @@ Const_expression::do_get_backend(Translate_context* context)
 void
 Const_expression::do_dump_expression(Ast_dump_context* ast_dump_context) const
 {
-  ast_dump_context->ostream() << this->constant_->name();
+  ast_dump_context->ostream() << this->constant_->simple_name();
 }
 
 // Make a reference to a constant in an expression.
@@ -14849,7 +14849,7 @@ Struct_field_offset_expression::do_dump_expression(
   ast_dump_context->dump_type(this->type_);
   ast_dump_context->ostream() << '.';
   ast_dump_context->ostream() <<
-    Gogo::message_name(this->field_->field_name());
+    this->field_->simple_field_name();
   ast_dump_context->ostream() << ")";
 }
 
@@ -14949,7 +14949,7 @@ class Label_addr_expression : public Expression
 
   void
   do_dump_expression(Ast_dump_context* ast_dump_context) const
-  { ast_dump_context->ostream() << this->label_->name(); }
+  { ast_dump_context->ostream() << this->label_->simple_name(); }
   
  private:
   // The label whose address we are taking.

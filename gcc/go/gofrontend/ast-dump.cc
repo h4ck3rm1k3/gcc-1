@@ -108,7 +108,19 @@ Ast_dump_traverse_statements::statement(Block* block, size_t* pindex,
 int
 Ast_dump_traverse_blocks_and_functions::function(Named_object* no)
 {
-  this->ast_dump_context_->ostream() << no->name();
+
+
+  if (no->package() != NULL)
+    {
+      this->ast_dump_context_->ostream() << "package ";
+      this->ast_dump_context_->ostream() << no->package()->pkgpath_symbol()  << "\n";
+    } else
+    { this->ast_dump_context_->ostream() << "package " << this->ast_dump_context_->gogo()->pkgpath_symbol() << "\n"; }
+
+
+
+  this->ast_dump_context_->ostream() << "func ";  
+  this->ast_dump_context_->ostream() << no->simple_name();
 
   go_assert(no->is_function());
   Function* func = no->func_value();
@@ -132,7 +144,7 @@ Ast_dump_traverse_blocks_and_functions::function(Named_object* no)
             this->ast_dump_context_->ostream() << ",";
           Named_object* no = (*it);
 
-          this->ast_dump_context_->ostream() << no->name() << " ";
+          this->ast_dump_context_->ostream() << no->simple_name() << " ";
           go_assert(no->is_result_variable());
           Result_variable* resvar = no->result_var_value();
 
@@ -196,7 +208,7 @@ Ast_dump_context::dump_type(const Type* t)
     this->ostream() << "(nil type)";
   else
     if (this->gogo_ != NULL)
-      this->ostream() << "(" << t->name(this->gogo_) <<  ")";
+      this->ostream() << "(" << t->simple_name(this->gogo_) <<  ")";
 }
 
 // Dump a textual representation of a block to the
@@ -253,7 +265,7 @@ Ast_dump_context::dump_expression_list(const Expression_list* el,
 void
 Ast_dump_context::dump_typed_identifier(const Typed_identifier* ti)
 {
-  this->ostream() << ti->name() << " ";
+  this->ostream() << ti->simple_name() << " ";
   this->dump_type(ti->type());
 }
 

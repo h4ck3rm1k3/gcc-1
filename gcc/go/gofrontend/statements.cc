@@ -317,7 +317,7 @@ Variable_declaration_statement::do_dump_statement(
   ast_dump_context->print_indent();
 
   go_assert(var_->is_variable());
-  ast_dump_context->ostream() << "var " << this->var_->name() <<  " ";
+  ast_dump_context->ostream() << "var " << this->var_->simple_name() <<  " ";
   Variable* var = this->var_->var_value();
   if (var->has_type())
     {

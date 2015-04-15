@@ -6989,6 +6989,13 @@ Named_object::get_backend(Gogo* gogo, std::vector<Bexpression*>& const_decls,
     }
 }
 
+std::string
+Named_object::simple_name() const
+{
+  return this->message_name() + "/" + this->name();
+}
+
+
 // Class Bindings.
 
 Bindings::Bindings(Bindings* enclosing)
@@ -7475,6 +7482,10 @@ Label::get_addr(Translate_context* context, Location location)
 {
   Blabel* label = this->get_backend_label(context);
   return context->backend()->label_address(label, location);
+}
+
+std::string  Label::simple_name(){
+  return this->name();
 }
 
 // Class Unnamed_label.

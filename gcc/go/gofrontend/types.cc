@@ -1143,6 +1143,18 @@ Type::finish_backend(Gogo* gogo, Btype *placeholder)
   this->btype_ = placeholder;
 }
 
+std::string
+Type::simple_name(Gogo* g) const
+{
+  const Named_type* n = this->named_type();
+  if (n ){
+    return n->simple_name() + "/" + this->mangled_name(g) + "/" + this->name(g);
+  }
+
+  return this->mangled_name(g) + "/" + this->name(g);
+}
+
+
 // Return a pointer to the type descriptor for this type.
 
 Bexpression*
@@ -2463,8 +2475,8 @@ Type::name(Gogo* gogo) const
 {
   std::string ret;
 
-  // The do_mangled_name virtual function should set RET to the
-  // mangled name.  For a composite type it should append a code for
+  // The do_name virtual function should set RET to the
+  // prerry name.  For a composite type it should append a code for
   // the composition and then call do_name on the components.
   this->do_name(gogo, &ret);
 
@@ -4051,7 +4063,7 @@ void
 Function_type::do_name(Gogo* gogo, std::string* ret) const
 {
   ret->append("/*Function_type*/");
-    
+  
   ret->append("func ");
 
   if (this->receiver_ != NULL)
@@ -4659,6 +4671,14 @@ Type::make_call_multiple_result_type(Call_expression* call)
 // Class Struct_field.
 
 // Get the name of a field.
+std::string
+Struct_field::simple_field_name() const
+{
+  std::string name(this->typed_identifier_.simple_name());
+  if (!name.empty())
+    return name;
+  return this->field_name();
+}
 
 const std::string&
 Struct_field::field_name() const
@@ -8611,6 +8631,13 @@ Named_type::name() const
 // Return the name of the type to use in an error message.
 
 std::string
+Named_type::simple_name() const
+{
+  return this->named_object_->message_name() + "/" + this->named_object_->name();
+}
+
+
+std::string
 Named_type::message_name() const
 {
   return this->named_object_->message_name();
@@ -10840,4 +10867,10 @@ Typed_identifier_list::copy() const
        ++p)
     ret->push_back(Typed_identifier(p->name(), p->type(), p->location()));
   return ret;
+}
+
+std::string
+Typed_identifier::simple_name() const
+{
+  return "Typed_identifier:" + this->name();
 }

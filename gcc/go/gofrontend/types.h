@@ -943,6 +943,9 @@ class Type
   std::string
   name(Gogo*) const;
 
+  std::string
+  simple_name(Gogo*) const;
+
   // If the size of the type can be determined, set *PSIZE to the size
   // in bytes and return true.  Otherwise, return false.  This queries
   // the backend.
@@ -1343,6 +1346,9 @@ class Typed_identifier
   const std::string&
   name() const
   { return this->name_; }
+
+  std::string
+  simple_name() const;
 
   // Get the type.
   Type*
@@ -2070,6 +2076,9 @@ class Struct_field
   // The field name.
   const std::string&
   field_name() const;
+
+  std::string
+  simple_field_name() const;
 
   // Return whether this struct field is named NAME.
   bool
@@ -2937,6 +2946,9 @@ class Named_type : public Type
   // return PACKAGE.NAME.
   std::string
   message_name() const;
+
+  std::string
+  simple_name() const;
 
   // Return the underlying type.
   Type*

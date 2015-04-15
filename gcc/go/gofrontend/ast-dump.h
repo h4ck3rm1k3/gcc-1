@@ -117,6 +117,9 @@ class Ast_dump_context : public String_dump
   std::ostream* ostream_;
 
   Gogo* gogo_;
+
+public:
+  Gogo* gogo() {return gogo_;}
 };
 
 #endif  // GO_AST_DUMP_H
