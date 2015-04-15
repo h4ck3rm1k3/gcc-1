@@ -4082,7 +4082,7 @@ Function_type::do_name(Gogo* gogo, std::string* ret) const
 	   ++p)
 	this->append_name(p->type(), gogo, ret);
       if (this->is_varargs_)
-	ret->append("...interface{} /*var args*/");
+	ret->append(" /*TODO :var args*/"); // TODO: fix this for varargs
       ret->push_back(')');
     }
 
