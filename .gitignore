@@ -18,3 +18,4 @@ build
 /log.txt
 /gcc/c-family/cpp
 /gcc/c-family/cpp.c
+/gcc/c-family/test2.c
