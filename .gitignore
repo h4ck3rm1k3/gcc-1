@@ -1,0 +1,20 @@
+# -*- mode: gitignore; -*-
+*~
+\#*\#
+\.#*
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+/#test.txt#
+/.#test.txt
+/gcc/#dumpfile.h#
+*.ii
+*.s
+*.o
+.deps
+build
+/log.txt
+/gcc/c-family/cpp
+/gcc/c-family/cpp.c
