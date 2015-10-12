@@ -24,7 +24,7 @@ along with this program; see the file COPYING3.  If not see
 #include "system.h"
 #include "cpplib.h"
 #include "internal.h"
-
+#include <assert.h>
 enum spell_type
 {
   SPELL_OPERATOR = 0,
@@ -2087,6 +2087,8 @@ _cpp_lex_direct (cpp_reader *pfile)
  fresh_line:
   result->flags = 0;
   buffer = pfile->buffer;
+  assert(buffer);
+  
   if (buffer->need_line)
     {
       if (pfile->state.in_deferred_pragma)
@@ -2606,6 +2608,8 @@ cpp_type2name (enum cpp_ttype type, unsigned char flags)
 void
 cpp_output_token (const cpp_token *token, FILE *fp)
 {
+  assert(fp);
+  
   switch (TOKEN_SPELL (token))
     {
     case SPELL_OPERATOR:

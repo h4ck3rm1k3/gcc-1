@@ -5622,12 +5622,14 @@ struct_ptr_eq (const void *a, const void *b)
   return *x == *y;
 }
 
+/*
 static inline hashval_t
 struct_ptr_hash (const void *a)
 {
   const void * const * x = (const void * const *) a;
   return (intptr_t)*x >> 4;
 }
+*/
 
 /* In fold-const.c */
 

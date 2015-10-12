@@ -26,6 +26,7 @@ along with this program; see the file COPYING3.  If not see
 #include "cpplib.h"
 #include "internal.h"
 #include "hashtab.h"
+#include <assert.h>
 
 static void trace_include (const struct line_maps *, const struct line_map *);
 static const struct line_map * linemap_ordinary_map_lookup (struct line_maps *,
@@ -214,7 +215,9 @@ new_linemap (struct line_maps *set,
 	= set->reallocator ? set->reallocator : xrealloc;
       line_map_round_alloc_size_func round_alloc_size =
 	set->round_alloc_size;
-
+      
+      assert(round_alloc_size);
+      
       /* We are going to execute some dance to try to reduce the
 	 overhead of the memory allocator, in case we are using the
 	 ggc-page.c one.
@@ -1356,6 +1359,9 @@ linemap_expand_location (struct line_maps *set,
 			 source_location loc)
 
 {
+  assert(set);
+  assert(map);
+  
   expanded_location xloc;
 
   memset (&xloc, 0, sizeof (xloc));

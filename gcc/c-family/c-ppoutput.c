@@ -25,7 +25,7 @@
 #include "tree.h"
 #include "c-common.h"		/* For flags.  */
 #include "c-pragma.h"		/* For parse_in.  */
-
+#include <assert.h>
 /* Encapsulates state used to convert a stream of tokens into a text
    file.  */
 static struct
@@ -114,6 +114,8 @@ preprocess_file (cpp_reader *pfile)
 void
 init_pp_output (FILE *out_stream)
 {
+  assert(parse_in);
+ 
   cpp_callbacks *cb = cpp_get_callbacks (parse_in);
 
   if (!flag_no_output)
@@ -165,6 +167,7 @@ static void
 scan_translation_unit (cpp_reader *pfile)
 {
   bool avoid_paste = false;
+  assert(parse_in);
   bool do_line_adjustments
     = cpp_get_options (parse_in)->lang != CLK_ASM
       && !flag_no_line_commands;
@@ -342,6 +345,7 @@ maybe_print_line_1 (source_location src_loc, FILE *stream)
 static void
 maybe_print_line (source_location src_loc)
 {
+  assert(parse_in);
   if (cpp_get_options (parse_in)->debug)
     linemap_dump_location (line_table, src_loc,
 			   print.outf);
@@ -397,6 +401,7 @@ print_line_1 (source_location src_loc, const char *special_flags, FILE *stream)
 static void
 print_line (source_location src_loc, const char *special_flags)
 {
+  assert(parse_in);
     if (cpp_get_options (parse_in)->debug)
       linemap_dump_location (line_table, src_loc,
 			     print.outf);
@@ -597,7 +602,7 @@ void
 pp_file_change (const struct line_map *map)
 {
   const char *flags = "";
-
+assert(parse_in);
   if (flag_no_line_commands)
     return;
 
